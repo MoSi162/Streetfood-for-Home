@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import ChefTips from './ChefTips'
+import ChefChat from './ChefChat'
 
 interface RecipeDetailProps {
   mealId: string
@@ -99,6 +101,18 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ mealId, onClose }) => {
                 <h3>Instructions</h3>
                 <p className="instructions-text">{meal.strInstructions}</p>
               </div>
+
+              <ChefTips 
+                dishName={meal.strMeal} 
+                ingredients={meal.ingredients.map((ing) => ing.name)}
+                cuisineType={meal.strArea}
+              />
+
+              <ChefChat
+                dishName={meal.strMeal}
+                ingredients={meal.ingredients.map((ing) => ing.name)}
+                cuisineType={meal.strArea}
+              />
 
               {meal.strYoutube && (
                 <div className="modal-section">

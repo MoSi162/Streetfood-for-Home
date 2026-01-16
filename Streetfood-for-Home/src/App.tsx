@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SearchBar from './components/Searchbar'
 import RecipeResults from './components/RecipeResults'
+import RecipeCarousel from './components/RecipeCarousel'
 import './App.css'
 
 interface Recipe {
@@ -9,6 +10,7 @@ interface Recipe {
   image: string
   ingredients?: string[]
   cuisines?: string[]
+  category?: string
 }
 
 function App() {
@@ -64,37 +66,47 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1>🚚 Streetfood for Home</h1>
-        <p>Find delicious street food recipes from around the world</p>
+      <header className="app-header netflix-header">
+        <div className="header-content">
+          <h1>🚚 Streetfood for Home</h1>
+          <p>Discover global street food recipes</p>
+        </div>
       </header>
 
-      <div className="search-section">
+      <div className="search-section netflix-search">
         <form onSubmit={handleSearchSubmit}>
           <SearchBar 
             search={search} 
             setSearch={setSearch}
             onSubmit={handleSearchSubmit}
           />
-          <button type="submit" className="search-btn">
+          <button type="submit" className="search-btn netflix-btn">
             🔍 Search
           </button>
         </form>
       </div>
 
       {error && <div className="error-message">{error}</div>}
-      {loading && <div className="loading">Loading recipes...</div>}
+      {loading && <div className="loading">
+        <div className="spinner"></div>
+        <p>Loading recipes...</p>
+      </div>}
       
       {recipes.length > 0 && (
-        <RecipeResults recipes={recipes} />
+        <>
+          <section className="carousel-section">
+            <h2 className="section-title">🔥 Featured Recipes</h2>
+            <RecipeCarousel recipes={recipes.slice(0, 10)} onRecipeClick={() => {}} />
+          </section>
+          <RecipeResults recipes={recipes} />
+        </>
       )}
       
       {!loading && recipes.length === 0 && !error && (
         <div className="empty-state">
+          <div className="empty-icon">🍜</div>
           <p>Search for ingredients, dishes, or cuisines to get started!</p>
-          <p style={{ fontSize: '0.9em', marginTop: '10px', opacity: 0.7 }}>
-            Try: "Pizza", "Tacos", "Ramen", "Shawarma", etc.
-          </p>
+          <p className="empty-hint">Try: "Pizza", "Tacos", "Ramen", "Shawarma", etc.</p>
         </div>
       )}
     </div>
@@ -102,3 +114,4 @@ function App() {
 }
 
 export default App
+
