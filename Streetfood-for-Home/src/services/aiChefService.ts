@@ -1,8 +1,4 @@
-/**
- * AI Chef Service
- * Uses Groq API (free tier) to generate Michelin-star chef tips for recipes
- * Groq API: https://console.groq.com/keys
- */
+
 
 interface ChefTipsResponse {
   tips: string[]
