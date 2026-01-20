@@ -1,0 +1,50 @@
+# Dependency folders
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Environment configs
+.env
+.env.local
+.env.*.local
+
+# Logs and debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# OS/Editor files
+.DS_Store
+Thumbs.db
+
+# Misc leftovers
+*.pid
+*.seed
+*.tgz
+
+# Coverage reports
+coverage/
+*.lcov
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: NextJS
+.next/
+out/
+.vercel/
+
+# Exclude locally built files
+*.local
+src/local/

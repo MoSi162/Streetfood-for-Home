@@ -1,0 +1,18 @@
+
+
+body {
+  font-family: 'system-ui', 'Avenir', 'Helvetica', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #ece9e6 0%, #ffffff 100%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f4f4f4;
+}
+::-webkit-scrollbar-thumb {
+  background: #eab308;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ca8a04;
+} 
