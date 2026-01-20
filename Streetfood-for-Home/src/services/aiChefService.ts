@@ -187,8 +187,12 @@ export async function* streamChefTips(
 ): AsyncGenerator<string> {
   if (!GROQ_API_KEY) {
     const tips = getFallbackTips(dishName)
-    for (const tip of tips.tips) {
-      yield tip
+    // Yield all tips joined together as a single message
+    const fullResponse = tips.tips.join('\n\n') + '\n\n🍷 Pairing: ' + tips.pairing + '\n📊 Difficulty: ' + tips.difficulty
+    for (const char of fullResponse) {
+      yield char
+      // Small delay to simulate streaming
+      await new Promise(resolve => setTimeout(resolve, 10))
     }
     return
   }
@@ -208,7 +212,7 @@ export async function* streamChefTips(
           {
             role: 'system',
             content:
-              'You are a passionate Michelin-star chef. Give 3-4 practical, specific tips for this dish. Be concise and actionable.',
+              'You are a passionate Michelin-star chef. Give 3-4 practical, specific tips for this dish. Be concise and actionable. Include a wine pairing suggestion and difficulty level.',
           },
           {
             role: 'user',
@@ -216,7 +220,7 @@ export async function* streamChefTips(
           },
         ],
         temperature: 0.7,
-        max_tokens: 300,
+        max_tokens: 500,
         stream: true,
       }),
     })
@@ -226,10 +230,20 @@ export async function* streamChefTips(
     }
 
     const reader = response.body?.getReader()
-    if (!reader) return
+    if (!reader) {
+      // Fallback if no reader
+      const tips = getFallbackTips(dishName)
+      const fullResponse = tips.tips.join('\n\n') + '\n\n🍷 Pairing: ' + tips.pairing + '\n📊 Difficulty: ' + tips.difficulty
+      for (const char of fullResponse) {
+        yield char
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+      return
+    }
 
     const decoder = new TextDecoder()
     let buffer = ''
+    let hasYielded = false
 
     while (true) {
       const { done, value } = await reader.read()
@@ -239,28 +253,44 @@ export async function* streamChefTips(
       const lines = buffer.split('\n')
 
       for (let i = 0; i < lines.length - 1; i++) {
-        const line = lines[i]
+        const line = lines[i].trim()
         if (line.startsWith('data: ')) {
           try {
-            const data = JSON.parse(line.slice(6))
+            const jsonStr = line.slice(6).trim()
+            if (jsonStr === '[DONE]') continue
+            
+            const data = JSON.parse(jsonStr)
             const content = data.choices?.[0]?.delta?.content
             if (content) {
+              hasYielded = true
               yield content
             }
-          } catch {
-            // Skip invalid JSON lines
+          } catch (e) {
+            // Skip invalid JSON lines silently
           }
         }
       }
 
       buffer = lines[lines.length - 1]
     }
+
+    // If nothing was yielded from API, use fallback
+    if (!hasYielded) {
+      const tips = getFallbackTips(dishName)
+      const fullResponse = tips.tips.join('\n\n') + '\n\n🍷 Pairing: ' + tips.pairing + '\n📊 Difficulty: ' + tips.difficulty
+      for (const char of fullResponse) {
+        yield char
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+    }
   } catch (error) {
     console.error('Error streaming chef tips:', error)
     // Fallback to non-streaming
     const tips = getFallbackTips(dishName)
-    for (const tip of tips.tips) {
-      yield tip
+    const fullResponse = tips.tips.join('\n\n') + '\n\n🍷 Pairing: ' + tips.pairing + '\n📊 Difficulty: ' + tips.difficulty
+    for (const char of fullResponse) {
+      yield char
+      await new Promise(resolve => setTimeout(resolve, 10))
     }
   }
 }

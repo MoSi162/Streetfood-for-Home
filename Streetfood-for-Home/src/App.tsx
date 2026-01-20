@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import SearchBar from './components/Searchbar'
-import RecipeResults from './components/RecipeResults'
 import RecipeCarousel from './components/RecipeCarousel'
+import ChefChat from './components/ChefChat'
 import './App.css'
 
 interface Recipe {
@@ -18,6 +18,8 @@ function App() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+  const [chatKey, setChatKey] = useState(0)
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return
@@ -64,6 +66,11 @@ function App() {
     handleSearch(search)
   }
 
+  const handleRecipeSelect = (recipe: Recipe) => {
+    setSelectedRecipe(recipe)
+    setChatKey(prev => prev + 1) // Force ChefChat remount for new recipe
+  }
+
   return (
     <div className="app-container">
       <header className="app-header netflix-header">
@@ -93,13 +100,19 @@ function App() {
       </div>}
       
       {recipes.length > 0 && (
-        <>
-          <section className="carousel-section">
-            <h2 className="section-title">🔥 Featured Recipes</h2>
-            <RecipeCarousel recipes={recipes.slice(0, 10)} onRecipeClick={() => {}} />
-          </section>
-          <RecipeResults recipes={recipes} />
-        </>
+        <section className="carousel-section">
+          <h2 className="section-title">🔥 Featured Recipes</h2>
+          <RecipeCarousel recipes={recipes.slice(0, 10)} onRecipeClick={handleRecipeSelect} />
+        </section>
+      )}
+      
+      {selectedRecipe && (
+        <ChefChat 
+          key={chatKey}
+          dishName={selectedRecipe.title} 
+          ingredients={selectedRecipe.ingredients}
+          cuisineType={selectedRecipe.category}
+        />
       )}
       
       {!loading && recipes.length === 0 && !error && (

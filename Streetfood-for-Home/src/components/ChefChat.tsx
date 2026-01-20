@@ -29,9 +29,9 @@ const ChefChat: React.FC<ChefChatProps> = ({ dishName, ingredients, cuisineType 
     scrollToBottom()
   }, [messages])
 
-  // Initialize with chef greeting
+  // Initialize with chef greeting - only once per recipe
   useEffect(() => {
-    if (messages.length === 0 && showChat) {
+    if (messages.length === 0) {
       setMessages([
         {
           id: '1',
@@ -40,8 +40,9 @@ const ChefChat: React.FC<ChefChatProps> = ({ dishName, ingredients, cuisineType 
           timestamp: new Date(),
         },
       ])
+      setShowChat(true) // Auto-open chat when recipe selected
     }
-  }, [showChat, dishName])
+  }, [dishName])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,23 +61,41 @@ const ChefChat: React.FC<ChefChatProps> = ({ dishName, ingredients, cuisineType 
     setIsLoading(true)
 
     try {
-      // Get chef response
-      let chefResponse = ''
+      // Create a placeholder for the chef message
+      const chefMessageId = (Date.now() + 1).toString()
+      let fullResponse = ''
+
+      // Add empty chef message that will be updated
+      setMessages((prev) => [...prev, {
+        id: chefMessageId,
+        text: '',
+        sender: 'chef',
+        timestamp: new Date(),
+      }])
 
       // Stream the response
       for await (const chunk of streamChefTips(dishName, ingredients, cuisineType)) {
-        chefResponse += chunk
+        fullResponse += chunk
+        // Update the message in real-time
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === chefMessageId
+              ? { ...msg, text: fullResponse }
+              : msg
+          )
+        )
       }
 
-      // Add chef message
-      const chefMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: chefResponse || "That's a great question! Use the tips above and remember: passion is the secret ingredient!",
-        sender: 'chef',
-        timestamp: new Date(),
+      // Ensure we have content
+      if (!fullResponse.trim()) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === chefMessageId
+              ? { ...msg, text: "That's a great question! Use the tips above and remember: passion is the secret ingredient!" }
+              : msg
+          )
+        )
       }
-
-      setMessages((prev) => [...prev, chefMessage])
     } catch (error) {
       console.error('Error getting chef response:', error)
       const errorMessage: Message = {
