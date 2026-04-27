@@ -22,32 +22,29 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ mealId, onClose }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchMealDetails()
-  }, [mealId])
+    const fetchMealDetails = async () => {
+      try {
+        const response = await fetch(
+          `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
+        )
+        const data = await response.json()
 
-  const fetchMealDetails = async () => {
-    try {
-      const response = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
-      )
-      const data = await response.json()
+        if (data.meals && data.meals[0]) {
+          const m = data.meals[0]
 
-      if (data.meals && data.meals[0]) {
-        const m = data.meals[0]
-
-        // Extract ingredients
-        const ingredients = []
-        for (let i = 1; i <= 20; i++) {
-          const ingredient = m[`strIngredient${i}`]
-          const measure = m[`strMeasure${i}`]
-          if (ingredient) {
-            ingredients.push({ name: ingredient, measure })
+          // Extract ingredients
+          const ingredients = []
+          for (let i = 1; i <= 20; i++) {
+            const ingredient = m[`strIngredient${i}`]
+            const measure = m[`strMeasure${i}`]
+            if (ingredient) {
+              ingredients.push({ name: ingredient, measure })
+            }
           }
-        }
 
-        setMeal({
-          strMeal: m.strMeal,
-          strMealThumb: m.strMealThumb,
+          setMeal({
+            strMeal: m.strMeal,
+            strMealThumb: m.strMealThumb,
           strArea: m.strArea,
           strCategory: m.strCategory,
           strInstructions: m.strInstructions,
@@ -60,7 +57,9 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ mealId, onClose }) => {
     } finally {
       setLoading(false)
     }
-  }
+    }
+    fetchMealDetails()
+  }, [mealId])
 
   return (
     <div className="modal-overlay" onClick={onClose}>

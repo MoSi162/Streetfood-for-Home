@@ -85,7 +85,6 @@ function App() {
           <SearchBar 
             search={search} 
             setSearch={setSearch}
-            onSubmit={handleSearchSubmit}
           />
           <button type="submit" className="search-btn netflix-btn">
             🔍 Search
